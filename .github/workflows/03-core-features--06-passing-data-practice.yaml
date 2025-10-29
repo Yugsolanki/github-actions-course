@@ -1,0 +1,28 @@
+name: Passing variables between jobs practice
+on: workflow_dispatch
+
+jobs:
+  producer:
+    runs-on: ubuntu-24.04
+
+    outputs:
+      boo: ${{steps.generate-boo.outputs.boo}}
+    steps:
+      - name: Generate and export boo
+        id: generate-boo
+        run: |
+          boo=bombastic_side_eye
+          echo "boo=${boo}" >> "$GITHUB_OUTPUT"
+      - name: Inspect values inside variable
+        run: |
+          echo "boo (it will not print, cuz not referenced):"
+          echo "boo (will print, cuz referenced): ${{steps.generate-boo.outputs.boo}}"
+
+  consumer:
+    runs-on: ubuntu-24.04
+    needs: producer
+    steps:
+      - name: Inspect values inside of consumer
+        run: |
+          echo "boo (will not print, cuz no referenced): ${boo}"
+          echo "boo (will print, cuz referenced): ${{needs.producer.outputs.boo}}"
